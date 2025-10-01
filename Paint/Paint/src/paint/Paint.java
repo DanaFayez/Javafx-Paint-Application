@@ -27,7 +27,7 @@ public class Paint extends Application {
     }
 
    
-    public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException {
+    public static void main(String[] args)  {
         launch(args);
         
     }

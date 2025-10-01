@@ -6,38 +6,53 @@ import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import paint.model.*;
 
-
 //Factory DP
 public class ShapeFactory {
-    
-    public ShapeFactory(){
-        
+
+    public ShapeFactory() {
     }
-    
-    public Shape createShape(String type, Point2D start, Point2D end, Color color){
-        Shape temp=null;
-        switch(type){
-            case"Circle": temp = new Circle(start,end,color);break;
-            case"Ellipse": temp = new Ellipse(start,end,color);break;
-            case"Rectangle": temp = new Rectangle(start,end,color);break;
-            case"Square": temp = new Square(start,end,color);break;
-            case"Line": temp = new Line(start,end,color);break;
-            case"Triangle": temp = new Triangle(start,end,color);break;
+
+    // تعديل
+    private static final java.util.Map<String, Shape> PROTOTYPES = new java.util.HashMap<>();
+    static {
+        PROTOTYPES.put("Circle", new Circle());
+        PROTOTYPES.put("Ellipse", new Ellipse());
+        PROTOTYPES.put("Rectangle", new Rectangle());
+        PROTOTYPES.put("Square", new Square());
+        PROTOTYPES.put("Line", new Line());
+        PROTOTYPES.put("Triangle", new Triangle());
+    }
+
+    private Shape cloneOf(String type) {
+        Shape proto = PROTOTYPES.get(type);
+        if (proto == null)
+            throw new IllegalArgumentException("Unknown shape type: " + type);
+        try {
+            return (Shape) proto.clone(); // يستدعي clone() العميق الذي عدّلناه في Shape
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
         }
-        return temp;
     }
-    
-    public Shape createShape(String type, HashMap<String,Double> m){
-        Shape temp=null;
-        switch(type){
-            case"Circle": temp = new Circle();break;
-            case"Ellipse": temp = new Ellipse();break;
-            case"Rectangle": temp = new Rectangle();break;
-            case"Square": temp = new Square();break;
-            case"Line": temp = new Line();break;
-            case"Triangle": temp = new Triangle();break;
-        }
-        temp.setProperties(m);
-        return temp;
+    // تعديل
+
+    // تعديل
+    public Shape createShape(String type, Point2D start, Point2D end, Color color) {
+        Shape s = cloneOf(type); // Prototype: نسخة من البروتوتايب
+        s.setPosition(start); // نضبط الإحداثيات مباشرة
+        s.setEndPosition(end);
+        s.setColor(color); // لون الحدود
+        s.setFillColor(Color.TRANSPARENT);// تعبئة افتراضية (تقدر تغيّرها لاحقاً)
+        s.setTopLeft(s.calculateTopLeft());// احسب المربع المحيط العلوي الأيسر
+        return s;
     }
+    // تعديل
+
+    // تعديل
+    public Shape createShape(String type, HashMap<String, Double> m) {
+        Shape s = cloneOf(type); // Prototype
+        s.setProperties(m); // يفك القيم عبر setPropertiesToVariables() في Shape
+        return s;
+    }
+    // تعديل
+
 }
