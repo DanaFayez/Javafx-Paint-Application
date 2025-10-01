@@ -3,7 +3,6 @@ package paint.model;
 
 import java.util.HashMap;
 import java.util.Map;
-import javafx.animation.Interpolatable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.paint.*;
@@ -161,15 +160,18 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
     public Shape clone() throws CloneNotSupportedException {
         Shape copy = (Shape) super.clone();
 
-        // نسخ عميق للـ properties (خريطة جديدة مستقلة)
-        Map<String, Double> currentProps = this.getProperties();
-        copy.properties = new HashMap<>(currentProps);
-
-        // نعيد حساب الحقول من الخريطة للنسخة الجديدة
-        copy.setPropertiesToVariables();
+    
+        if (this.properties != null && !this.properties.isEmpty()) {
+            copy.properties = new java.util.HashMap<>(this.properties);
+            copy.setPropertiesToVariables(); 
+        } else {
+          
+            copy.properties = new java.util.HashMap<>();
+        }
 
         return copy;
     }
+
     // تعديل
 
     public Point2D calculateTopLeft() {

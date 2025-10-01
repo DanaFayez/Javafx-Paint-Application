@@ -1,6 +1,7 @@
 package paint.model;
 
-public interface iShape extends Cloneable { // تعديل
+// أبقِ على extends Cloneable
+public interface iShape extends Cloneable { 
 
     public void setPosition(javafx.geometry.Point2D position);
 
@@ -25,7 +26,7 @@ public interface iShape extends Cloneable { // تعديل
      */
     public void draw(javafx.scene.canvas.Canvas canvas);
 
-    /* create a deep clone of the shape */
-    public iShape clone() throws CloneNotSupportedException; // تعديل
+    // **احذف هذا السطر:**
+    // public iShape clone() throws CloneNotSupportedException; 
 
 }

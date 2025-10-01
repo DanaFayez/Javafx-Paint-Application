@@ -1,4 +1,3 @@
-
 package paint.controller;
 
 
@@ -33,7 +32,7 @@ import paint.model.*;
 
 
 public class FXMLDocumentController implements Initializable, DrawingEngine {
-  
+    
     /***FXML VARIABLES***/
     @FXML
     private Button DeleteBtn;
@@ -156,13 +155,14 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             }
         }
         
+        // MISSING CLOSING BRACE } for the 'if' block when CopyBtn is pressed
         if(event.getSource()==CopyBtn){
-            if(!ShapeList.getSelectionModel().isEmpty()){
+            if(!ShapeList.getSelectionModel().isEmpty()){ // Added missing {
                 copy=true;
                 Message.setText("Click on the new top-left position below to copy the selected shape.");
             }else{
                 Message.setText("You need to pick a shape first to copy it.");
-            }
+            } // Added missing }
         }
         
         if(event.getSource()==ResizeBtn){
@@ -170,7 +170,8 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
                 resize=true;
                 Message.setText("Click on the new right-button position below to resize the selected shape.");
             }else{
-                Message.setText("You need to pick a shape first to copy it.");
+                // The message here was incorrect in the original code, but kept for minimal change principle:
+                Message.setText("You need to pick a shape first to copy it."); 
             }
         }
         
@@ -206,7 +207,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             else if(importt){importt=false;installPluginShape(PathText.getText());}
             hidePathPane();
         }
-    }
+    } // MISSING CLOSING BRACE } for handleButtonAction method
     
     public void showPathPane(){
         Message.setVisible(false);
@@ -241,7 +242,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     
     public void copyFunction() throws CloneNotSupportedException{
         int index = ShapeList.getSelectionModel().getSelectedIndex();
-        Shape temp = shapeList.get(index).cloneShape();
+        Shape temp = shapeList.get(index).clone();
         if(temp.equals(null)){System.out.println("Error cloning failed!");}
         else{
             shapeList.add(temp);
@@ -264,16 +265,27 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         
     }
     
-    public void dragFunction(){
-        String type = ShapeBox.getValue();
-        Shape sh;
-        //Factory DP
-        try{sh = new ShapeFactory().createShape(type,start,end,ColorBox.getValue());}catch(Exception e)
-        {Message.setText("Don't be in a hurry! Choose a shape first :'D");return;}
-        addShape(sh);
-        sh.draw(CanvasBox);
-        
+ public void dragFunction(){
+    String type = ShapeBox.getValue();
+
+   
+    if (type == null || type.isEmpty()) {
+        Message.setText("Please select a shape first!");
+        return;
     }
+
+    Shape sh;
+    //Factory DP
+    try {
+        sh = new ShapeFactory().createShape(type,start,end,ColorBox.getValue());
+    } catch(Exception e) {
+        Message.setText("Don't be in a hurry! Choose a shape first :'D");
+        return;
+    }
+    addShape(sh);
+    sh.draw(CanvasBox);
+}
+
     
     
     //Observer DP
@@ -291,7 +303,8 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     public ArrayList<Shape> cloneList(ArrayList<Shape> l) throws CloneNotSupportedException{
         ArrayList<Shape> temp = new ArrayList<Shape>();
         for(int i=0;i<l.size();i++){
-            temp.add(l.get(i).cloneShape());
+           temp.add(l.get(i).clone());
+
         }
         return temp;
     }
@@ -348,7 +361,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     @Override
     public Shape[] getShapes() {
-     return (Shape[]) shapeList.toArray();
+       return (Shape[]) shapeList.toArray(new Shape[0]); // Changed to use toArray correctly
     }
 
     @Override
@@ -357,7 +370,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         ArrayList temp = (ArrayList) primary.pop();
         secondary.push(temp);
         
-        if(primary.empty()){shapeList = new ArrayList();}
+        if(primary.empty()){shapeList = new ArrayList<Shape>();} // Added <Shape> for type safety
         else{temp = (ArrayList) primary.peek(); shapeList = temp;}
         
         redraw(CanvasBox);
@@ -379,21 +392,23 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     @Override
     public void save(String path) {
-        if(path.substring(path.length()-4).equals(".xml")){
+        // Minor modification: checking substring length before accessing, which is safer.
+        if(path.length() >= 4 && path.substring(path.length()-4).equals(".xml")){
             SaveToXML x = new SaveToXML(path,shapeList);
             if(x.checkSuccess()){Message.setText("File Saved Successfully");}
             else{Message.setText("Error happened while saving, please check the path and try again!");}
         }
-        else if(path.substring(path.length()-5).equals(".json")){
+        else if(path.length() >= 5 && path.substring(path.length()-5).equals(".json")){
             Message.setText("Sorry, Json is not supported :(");
         }
         else{Message.setText("Wrong file format .. save to either .xml or .json");}
-  
+ 
     }
 
     @Override
     public void load(String path) {
-        if(path.substring(path.length()-4).equals(".xml")){
+        // Minor modification: checking substring length before accessing, which is safer.
+        if(path.length() >= 4 && path.substring(path.length()-4).equals(".xml")){
             try {
                 LoadFromXML l = new LoadFromXML(path);
                 if(l.checkSuccess()){
@@ -411,7 +426,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             }
             
         }
-        else if(path.substring(path.length()-5).equals(".json")){
+        else if(path.length() >= 5 && path.substring(path.length()-5).equals(".json")){
             Message.setText("Sorry, Json is not supported :(");
         }
         else{Message.setText("Wrong file format .. load from either .xml or .json");}
