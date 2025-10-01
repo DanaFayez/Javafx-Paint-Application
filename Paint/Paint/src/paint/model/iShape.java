@@ -26,7 +26,6 @@ public interface iShape extends Cloneable {
      */
     public void draw(javafx.scene.canvas.Canvas canvas);
 
-    // **احذف هذا السطر:**
-    // public iShape clone() throws CloneNotSupportedException; 
+    public iShape clone() throws CloneNotSupportedException; 
 
 }

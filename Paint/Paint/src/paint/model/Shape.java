@@ -172,7 +172,7 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
         return copy;
     }
 
-    // تعديل
+   
 
     public Point2D calculateTopLeft() {
         double x = Math.min(this.getPosition().getX(), this.getEndPosition().getX());
