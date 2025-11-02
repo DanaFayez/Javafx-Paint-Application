@@ -1,10 +1,10 @@
-
 package paint.model;
 
 import java.util.HashMap;
 import java.util.Map;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.*;
 
 public abstract class Shape implements iShape, java.lang.Cloneable {
@@ -14,6 +14,8 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
     private Point2D topLeft;
     private Color color;
     private Color fillColor;
+    private ColorAPI colorAPI; // Bridge pattern
+    private ColorAPI fillColorAPI; // Bridge pattern
     private Map<String, Double> properties = new HashMap<>(); // تعديل
 
     public Shape() {
@@ -37,7 +39,6 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
      * this.fillColor = fillColor;
      * }
      */
-
     @Override
     public void setPosition(Point2D position) {
         this.startPosition = position;
@@ -61,6 +62,42 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
         this.properties = properties;
         setPropertiesToVariables();
     }
+        // Getters and Setters for ColorAPI
+    public void setColorAPI(ColorAPI colorAPI) {
+        this.colorAPI = colorAPI;
+    }
+
+    public ColorAPI getColorAPI() {
+        return colorAPI;
+    }
+
+    public void setFillColorAPI(ColorAPI fillColorAPI) {
+        this.fillColorAPI = fillColorAPI;
+    }
+
+    public ColorAPI getFillColorAPI() {
+        return fillColorAPI;
+    }
+
+    // @Override
+    // public void setColor(Color color) {
+    //     this.colorAPI = new SolidColor(color);
+    // }
+
+    // @Override
+    // public Color getColor() {
+    //     return colorAPI != null ? colorAPI.getColor() : Color.BLACK;
+    // }
+
+    // @Override
+    // public void setFillColor(Color color) {
+    //     this.fillColorAPI = new SolidColor(color);
+    // }
+
+    // @Override
+    // public Color getFillColor() {
+    //     return fillColorAPI != null ? fillColorAPI.getColor() : Color.TRANSPARENT;
+    // }
 
     protected void setPropertiesToVariables() {
         double startX, startY, endX, endY, topLeftX, topLeftY;
@@ -151,28 +188,39 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
     }
 
     @Override
-    public void draw(Canvas canvas) {
-
+   public void draw(Canvas canvas) {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        
+        // تطبيق Bridge pattern للألوان
+        if (fillColorAPI instanceof GradientColor) {
+            gc.setFill(((GradientColor) fillColorAPI).getGradient());
+        } else {
+            gc.setFill(getFillColor());
+        }
+        
+        if (colorAPI instanceof GradientColor) {
+            gc.setStroke(((GradientColor) colorAPI).getGradient());
+        } else {
+            gc.setStroke(getColor());
+        }
     }
+    
 
     // تعديل
     @Override
     public Shape clone() throws CloneNotSupportedException {
         Shape copy = (Shape) super.clone();
 
-    
         if (this.properties != null && !this.properties.isEmpty()) {
             copy.properties = new java.util.HashMap<>(this.properties);
-            copy.setPropertiesToVariables(); 
+            copy.setPropertiesToVariables();
         } else {
-          
+
             copy.properties = new java.util.HashMap<>();
         }
 
         return copy;
     }
-
-   
 
     public Point2D calculateTopLeft() {
         double x = Math.min(this.getPosition().getX(), this.getEndPosition().getX());
