@@ -15,22 +15,20 @@ public class BorderDecorator extends ShapeDecorator {
         this.borderColor = borderColor;
     }
 
-// paint.model.BorderDecorator.draw() - الحل المقترح
     @Override
     public void draw(Canvas canvas) {
-        // 1. حفظ خصائص الحد الأصلية (قبل التغيير)
-        Color originalColor = decoratedShape.getColor(); // لون الحد الأصلي
-        double originalLineWidth = canvas.getGraphicsContext2D().getLineWidth(); // سمك الحد الأصلي
+        // Save original color and line width
+        Color originalColor = decoratedShape.getColor();
+        double originalLineWidth = canvas.getGraphicsContext2D().getLineWidth();
 
-        // 2. تطبيق خصائص الحد الجديدة على الشكل المزين
-        // نغير لون الحد في الكائن المزين مؤقتاً
+        // Apply new border properties
         decoratedShape.setColor(borderColor);
         canvas.getGraphicsContext2D().setLineWidth(borderWidth);
 
-        // 3. نرسم الشكل مرة واحدة. (يفترض أن الشكل الأساسي سيستخدم اللون والسمك الجديدين)
+        // Draw the shape with new border
         decoratedShape.draw(canvas);
 
-        // 4. إعادة الخصائص الأصلية للرسم التالي
+        // Restore original properties
         decoratedShape.setColor(originalColor);
         canvas.getGraphicsContext2D().setLineWidth(originalLineWidth);
     }

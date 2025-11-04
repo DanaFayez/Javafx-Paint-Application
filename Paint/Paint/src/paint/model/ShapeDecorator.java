@@ -12,6 +12,10 @@ public ShapeDecorator(iShape decoratedShape) {
     this.decoratedShape = decoratedShape;
 }
 
+    // Getter for decorated shape
+    public iShape getDecoratedShape() {
+        return this.decoratedShape;
+    }
 
     @Override
     public void draw(Canvas canvas) {

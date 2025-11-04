@@ -1,6 +1,5 @@
 package paint.model;
 
-// أبقِ على extends Cloneable
 public interface iShape extends Cloneable { 
 
     public void setPosition(javafx.geometry.Point2D position);

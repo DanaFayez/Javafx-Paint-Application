@@ -186,8 +186,6 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
         }
     }
     
-
-    // تعديل
     @Override
     public Shape clone() throws CloneNotSupportedException {
         Shape copy = (Shape) super.clone();

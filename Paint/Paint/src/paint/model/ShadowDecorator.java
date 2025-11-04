@@ -28,38 +28,40 @@ public class ShadowDecorator extends ShapeDecorator {
         if (baseShape instanceof Shape) {
             Shape shapeObj = (Shape) baseShape;
             
+            // Save original stroke width
+            double originalStrokeWidth = gc.getLineWidth();
+            
             // Save original colors
             Color originalStroke = shapeObj.getColor();
             Color originalFill = shapeObj.getFillColor();
             
-            // Draw shadow layers around the shape (creates blurred shadow effect)
-            // Draw multiple concentric copies with decreasing opacity
-            shapeObj.setColor(Color.color(0.5, 0.5, 0.5, 0.2));  // Light gray, very transparent
-            shapeObj.setFillColor(Color.color(0.5, 0.5, 0.5, 0.2));
+            // Draw smooth, blurred shadow with multiple layers and decreasing opacity
+            // This creates a professional drop shadow effect
+            shapeObj.setColor(Color.color(0, 0, 0, 0));  // No stroke for shadow
+            shapeObj.setFillColor(Color.TRANSPARENT);
             
-            // Layer 1: Largest shadow (farthest from shape)
-            Point2D originalPos = shapeObj.getPosition();
-            for (int i = 6; i >= 1; i--) {
-                double offset = i * 1.5;
+            // Draw shadow layers from thick to thin (outside to inside)
+            // Each layer gets progressively more transparent
+            for (int layer = 1; layer <= 8; layer++) {
+                double opacity = 0.15 * (1.0 - (layer / 8.0));  // Decreasing opacity
+                double lineWidth = (9 - layer) * 1.5;  // Decreasing line width
                 
-                // Draw in all 8 directions to create outline shadow
-                for (double angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
-                    double offsetX = Math.cos(angle) * offset;
-                    double offsetY = Math.sin(angle) * offset;
-                    Point2D shadowPos = new Point2D(originalPos.getX() + offsetX,
-                                                   originalPos.getY() + offsetY);
-                    shapeObj.setPosition(shadowPos);
-                    baseShape.draw(canvas);
-                }
+                Color shadowColor = Color.color(0, 0, 0, opacity);
+                shapeObj.setColor(shadowColor);
+                gc.setLineWidth(lineWidth);
+                
+                baseShape.draw(canvas);
             }
             
-            // Restore original position and colors
-            shapeObj.setPosition(originalPos);
+            // Restore original stroke width
+            gc.setLineWidth(originalStrokeWidth);
+            
+            // Restore original colors
             shapeObj.setColor(originalStroke);
             shapeObj.setFillColor(originalFill);
         }
         
-        // Draw the original shape on top with full opacity
+        // Draw the original shape on top with full appearance
         decoratedShape.draw(canvas);
     }
 }

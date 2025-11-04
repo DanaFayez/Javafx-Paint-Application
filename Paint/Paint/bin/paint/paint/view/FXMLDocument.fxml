@@ -63,18 +63,6 @@
                                 <Cursor fx:constant="HAND" />
                             </cursor>
                         </ColorPicker>
-                        <!-- 3. Solid (عرض 75) -->
-                        <Button text="Solid" maxHeight="50.0" minHeight="50.0" mnemonicParsing="false" onAction="#handleSolidColor" prefHeight="50.0" prefWidth="75.0" style="-fx-background-radius: 0px; -fx-background-color: #FFD700;">
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Button>
-                        <!-- 4. Gradient (عرض 75) -->
-                        <Button text="Gradient" maxHeight="50.0" minHeight="50.0" mnemonicParsing="false" onAction="#handleGradientColor" prefHeight="50.0" prefWidth="75.0" style="-fx-background-radius: 0px; -fx-background-color: #FFA500;">
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Button>
                         <!-- 5. Shadow (عرض 75) -->
                         <Button text="Shadow" maxHeight="50.0" minHeight="50.0" mnemonicParsing="false" onAction="#handleShadowEffect" prefHeight="50.0" prefWidth="75.0" style="-fx-background-radius: 0px; -fx-background-color: #9370DB;">
                             <cursor>

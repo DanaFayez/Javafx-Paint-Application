@@ -1,6 +1,6 @@
 package paint.controller;
 
-import java.io.IOException; // تم إضافة هذا الاستيراد المفقود
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -129,7 +129,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     private Stack primary = new Stack<ArrayList<Shape>>();
     private Stack secondary = new Stack<ArrayList<Shape>>();
 
-    // تم إضافة القوس الناقص } لدالة handleButtonAction()
+    // handleButtonAction added
     @FXML
     private void handleButtonAction(ActionEvent event) {
         if (event.getSource() == StartBtn) {
@@ -150,7 +150,6 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         if (event.getSource() == RecolorBtn) {
             if (!ShapeList.getSelectionModel().isEmpty()) {
                 int index = ShapeList.getSelectionModel().getSelectedIndex();
-                // تم تعديل هذا السطر ليتوافق مع استخدام ColorAPI (Bridge Pattern)
                 shapeList.get(index).setFillColor(ColorBox.getValue());
                 refresh(CanvasBox);
             } else {
@@ -424,20 +423,8 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         
         try {
             for (int i = 0; i < shapeList.size(); i++) {
-                iShape baseShape = shapeList.get(i); // الشكل الأساسي
-                iShape shToDraw = baseShape; 
+                iShape shToDraw = shapeList.get(i); // الشكل الأساسي أو المزيّن
 
-                // APPLY DECORATORS HERE BEFORE DRAWING
-                // نغلف الشكل الأساسي بالـ Decorators إذا كانت مفعّلة
-                if (useShadow) {
-                    // يفترض وجود ShadowDecorator
-                    shToDraw = new ShadowDecorator(shToDraw, 10.0, Color.GRAY);
-                }
-                if (useBorder) {
-                    // يفترض وجود BorderDecorator
-                    shToDraw = new BorderDecorator(shToDraw, 3.0, Color.BLACK);
-                }
-                
                 // يتم الرسم باستخدام الكائن المزيّن (أو الشكل الأساسي إذا لم يكن هناك Decorator)
                 shToDraw.draw(canvas);
             }
@@ -590,59 +577,63 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         Message.setText("Not supported yet.");
     }
 
-    // ==================== COLOR PATTERN METHODS ====================
-    /**
-     * Handle solid color selection
-     */
-    @FXML
-    public void handleSolidColor(ActionEvent event) {
-        if (!ShapeList.getSelectionModel().isEmpty()) {
-            int index = ShapeList.getSelectionModel().getSelectedIndex();
-            iShape shape = shapeList.get(index);
-            shape.setFillColor(ColorBox.getValue());
-            Message.setText("Applied solid color to shape");
-            refresh(CanvasBox);
-        } else {
-            Message.setText("Select a shape first to apply solid color");
-        }
-    }
-
-    /**
-     * Handle gradient color selection
-     */
-    @FXML
-    public void handleGradientColor(ActionEvent event) {
-        if (!ShapeList.getSelectionModel().isEmpty()) {
-            int index = ShapeList.getSelectionModel().getSelectedIndex();
-            iShape shape = shapeList.get(index);
-            
-            // Apply a brighter version of the selected color to show gradient effect
-            Color baseColor = ColorBox.getValue();
-            Color gradientColor = baseColor.interpolate(Color.WHITE, 0.5);  // 50% toward white
-            
-            shape.setFillColor(gradientColor);
-            Message.setText("Applied gradient color effect to shape");
-            refresh(CanvasBox);
-        } else {
-            Message.setText("Select a shape first to apply gradient color");
-        }
-    }
-
     // ==================== DECORATOR PATTERN METHODS ====================
     // Decorator pattern methods
     @FXML
     public void handleShadowEffect(ActionEvent event) {
-        useShadow = !useShadow;
-        Message.setText(useShadow ? "Shadow effect enabled" : "Shadow effect disabled");
-        // إعادة رسم اللوحة لتطبيق التأثير على الأشكال الموجودة
+        int selectedIndex = ShapeList.getSelectionModel().getSelectedIndex();
+        
+        if (selectedIndex < 0 || selectedIndex >= shapeList.size()) {
+            Message.setText("Please select a shape first!");
+            return;
+        }
+        
+        iShape selectedShape = shapeList.get(selectedIndex);
+        
+        // Check if shadow is already applied
+        boolean hasShadow = selectedShape instanceof ShadowDecorator;
+        
+        if (hasShadow) {
+            // Remove shadow decorator by unwrapping it
+            iShape unwrapped = ((ShadowDecorator) selectedShape).getDecoratedShape();
+            shapeList.set(selectedIndex, unwrapped);
+            Message.setText("Shadow removed from shape");
+        } else {
+            // Apply shadow decorator
+            iShape decoratedShape = new ShadowDecorator(selectedShape, 10.0, Color.GRAY);
+            shapeList.set(selectedIndex, decoratedShape);
+            Message.setText("Shadow applied to shape");
+        }
+        
         redraw(CanvasBox);
     }
 
     @FXML
     public void handleBorderEffect(ActionEvent event) {
-        useBorder = !useBorder;
-        Message.setText(useBorder ? "Border effect enabled" : "Border effect disabled");
-        // إعادة رسم اللوحة لتطبيق التأثير على الأشكال الموجودة
+        int selectedIndex = ShapeList.getSelectionModel().getSelectedIndex();
+        
+        if (selectedIndex < 0 || selectedIndex >= shapeList.size()) {
+            Message.setText("Please select a shape first!");
+            return;
+        }
+        
+        iShape selectedShape = shapeList.get(selectedIndex);
+        
+        // Check if border is already applied
+        boolean hasBorder = selectedShape instanceof BorderDecorator;
+        
+        if (hasBorder) {
+            // Remove border decorator by unwrapping it
+            iShape unwrapped = ((BorderDecorator) selectedShape).getDecoratedShape();
+            shapeList.set(selectedIndex, unwrapped);
+            Message.setText("Border removed from shape");
+        } else {
+            // Apply border decorator
+            iShape decoratedShape = new BorderDecorator(selectedShape, 3.0, Color.BLACK);
+            shapeList.set(selectedIndex, decoratedShape);
+            Message.setText("Border applied to shape");
+        }
+        
         redraw(CanvasBox);
     }
 
