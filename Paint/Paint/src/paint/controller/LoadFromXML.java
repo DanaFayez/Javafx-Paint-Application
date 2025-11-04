@@ -8,10 +8,11 @@ import javax.xml.parsers.*;
 import org.xml.sax.*;
 import org.w3c.dom.*;
 import paint.model.Shape;
+import paint.model.iShape;
 
 public class LoadFromXML {
     private String path;
-    private ArrayList myList = new ArrayList<Shape>();
+    private ArrayList<iShape> myList = new ArrayList<>();
     private HashMap m;
     private boolean success=false;
     
@@ -60,7 +61,7 @@ public class LoadFromXML {
         m.put(key, val);
     }
     
-    public ArrayList<Shape> getList(){
+    public ArrayList<iShape> getList(){
         return myList;
     }
     

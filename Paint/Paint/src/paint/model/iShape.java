@@ -7,6 +7,10 @@ public interface iShape extends Cloneable {
 
     public javafx.geometry.Point2D getPosition();
 
+    public void setTopLeft(javafx.geometry.Point2D position);
+
+    public javafx.geometry.Point2D getTopLeft();
+
     /* update shape specific properties (e.g., radius) */
     public void setProperties(java.util.Map<String, Double> properties);
 

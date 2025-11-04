@@ -14,14 +14,15 @@ import javax.xml.transform.stream.*;
 import org.xml.sax.*;
 import org.w3c.dom.*;
 import paint.model.Shape;
+import paint.model.iShape;
 
 public class SaveToXML {
     private String path;
     private Map<String, Double> m;
-    private ArrayList<Shape> l;
+    private ArrayList<iShape> l;
     private boolean success=false;
     
-    public SaveToXML(String path, ArrayList<Shape> l){
+    public SaveToXML(String path, ArrayList<iShape> l){
         this.path = path;
         this.l = l;
         try{doTheJob();}catch(Exception e){System.out.println("Failed to save xml");}

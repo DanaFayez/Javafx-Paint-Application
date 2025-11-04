@@ -1,6 +1,7 @@
 package paint.controller;
 
 import paint.model.Shape;
+import paint.model.iShape;
 
 
 public interface DrawingEngine {
@@ -10,7 +11,7 @@ public interface DrawingEngine {
     
     public void addShape(Shape shape);
     
-    public void removeShape(Shape shape);
+    public void removeShape(iShape shape);
     
     public void updateShape(Shape oldShape, Shape newShape);
     

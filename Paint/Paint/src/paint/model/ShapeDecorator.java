@@ -30,6 +30,16 @@ public ShapeDecorator(iShape decoratedShape) {
     }
 
     @Override
+    public void setTopLeft(Point2D position) {
+        decoratedShape.setTopLeft(position);
+    }
+
+    @Override
+    public Point2D getTopLeft() {
+        return decoratedShape.getTopLeft();
+    }
+
+    @Override
     public void setProperties(Map<String, Double> properties) {
         decoratedShape.setProperties(properties);
     }

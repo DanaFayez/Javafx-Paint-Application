@@ -12,18 +12,18 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
     private Point2D startPosition;
     private Point2D endPosition;
     private Point2D topLeft;
-    private Color color;
+    private Color strokeColor;
     private Color fillColor;
-    private ColorAPI colorAPI; // Bridge pattern
-    private ColorAPI fillColorAPI; // Bridge pattern
-    private Map<String, Double> properties = new HashMap<>(); // تعديل
+    private LinearGradient strokeGradient;  // Composition for gradient support
+    private LinearGradient fillGradient;    // Composition for gradient support
+    private Map<String, Double> properties = new HashMap<>();
 
     public Shape() {
         // Variables will be set by the Properties map.
     }
 
     public Shape(Point2D startPos, Point2D endPos, Color strockColor) {
-        this.color = strockColor;
+        this.strokeColor = strockColor;
         this.startPosition = startPos;
         this.endPosition = endPos;
         this.fillColor = Color.TRANSPARENT;
@@ -62,42 +62,6 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
         this.properties = properties;
         setPropertiesToVariables();
     }
-        // Getters and Setters for ColorAPI
-    public void setColorAPI(ColorAPI colorAPI) {
-        this.colorAPI = colorAPI;
-    }
-
-    public ColorAPI getColorAPI() {
-        return colorAPI;
-    }
-
-    public void setFillColorAPI(ColorAPI fillColorAPI) {
-        this.fillColorAPI = fillColorAPI;
-    }
-
-    public ColorAPI getFillColorAPI() {
-        return fillColorAPI;
-    }
-
-    // @Override
-    // public void setColor(Color color) {
-    //     this.colorAPI = new SolidColor(color);
-    // }
-
-    // @Override
-    // public Color getColor() {
-    //     return colorAPI != null ? colorAPI.getColor() : Color.BLACK;
-    // }
-
-    // @Override
-    // public void setFillColor(Color color) {
-    //     this.fillColorAPI = new SolidColor(color);
-    // }
-
-    // @Override
-    // public Color getFillColor() {
-    //     return fillColorAPI != null ? fillColorAPI.getColor() : Color.TRANSPARENT;
-    // }
 
     protected void setPropertiesToVariables() {
         double startX, startY, endX, endY, topLeftX, topLeftY;
@@ -123,7 +87,7 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
         fillG = (Double) properties.get("fillG");
         fillB = (Double) properties.get("fillB");
 
-        color = Color.color(strockR, strockG, strockB);
+        strokeColor = Color.color(strockR, strockG, strockB);
 
         fillColor = Color.color(fillR, fillG, fillB);
 
@@ -154,9 +118,9 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
         properties.put("topLeftX", topLeft.getX());
         properties.put("topLeftY", topLeft.getY());
 
-        properties.put("strockR", color.getRed());
-        properties.put("strockG", color.getGreen());
-        properties.put("strockB", color.getBlue());
+        properties.put("strockR", strokeColor.getRed());
+        properties.put("strockG", strokeColor.getGreen());
+        properties.put("strockB", strokeColor.getBlue());
 
         properties.put("fillR", fillColor.getRed());
         properties.put("fillG", fillColor.getGreen());
@@ -169,12 +133,12 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
 
     @Override
     public void setColor(Color color) {
-        this.color = color;
+        this.strokeColor = color;
     }
 
     @Override
     public Color getColor() {
-        return this.color;
+        return this.strokeColor;
     }
 
     @Override
@@ -187,21 +151,38 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
         return this.fillColor;
     }
 
+    // Composition: Gradient support methods
+    public void setStrokeGradient(LinearGradient gradient) {
+        this.strokeGradient = gradient;
+    }
+
+    public LinearGradient getStrokeGradient() {
+        return this.strokeGradient;
+    }
+
+    public void setFillGradient(LinearGradient gradient) {
+        this.fillGradient = gradient;
+    }
+
+    public LinearGradient getFillGradient() {
+        return this.fillGradient;
+    }
+
     @Override
    public void draw(Canvas canvas) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         
-        // تطبيق Bridge pattern للألوان
-        if (fillColorAPI instanceof GradientColor) {
-            gc.setFill(((GradientColor) fillColorAPI).getGradient());
+        // Use composition for gradient support
+        if (strokeGradient != null) {
+            gc.setStroke(strokeGradient);
         } else {
-            gc.setFill(getFillColor());
+            gc.setStroke(strokeColor);
         }
         
-        if (colorAPI instanceof GradientColor) {
-            gc.setStroke(((GradientColor) colorAPI).getGradient());
+        if (fillGradient != null) {
+            gc.setFill(fillGradient);
         } else {
-            gc.setStroke(getColor());
+            gc.setFill(fillColor);
         }
     }
     
