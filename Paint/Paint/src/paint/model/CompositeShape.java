@@ -26,11 +26,16 @@ public class CompositeShape implements iShape, java.lang.Cloneable {
     }
     
     /**
-     * Add a shape to this composite group
+     * Add a shape to this composite group(Groupe Button)
      */
+
     public void addShape(iShape shape) {
         if (shape != null) {
             children.add(shape);
+            // Update group position to track the first child's position
+            if (children.size() == 1) {
+                this.position = shape.getPosition();
+            }
         }
     }
     
@@ -75,14 +80,31 @@ public class CompositeShape implements iShape, java.lang.Cloneable {
     
     /**
      * Set position for all shapes in the group
+     * Moves all children by the same offset to maintain group structure
      */
     @Override
-    public void setPosition(Point2D position) {
-        this.position = position;
-        // Move all children relative to group position
-        for (iShape shape : children) {
-            shape.setPosition(position);
+    public void setPosition(Point2D newPosition) {
+        // If group is empty, just set position
+        if (children.isEmpty()) {
+            this.position = newPosition;
+            return;
         }
+        
+        // Get the current position of the first child as the actual group position
+        Point2D currentGroupPosition = children.get(0).getPosition();
+        
+        // Calculate the offset to move
+        Point2D offset = newPosition.subtract(currentGroupPosition);
+        
+        // Move all children by the same offset
+        for (iShape shape : children) {
+            Point2D currentPos = shape.getPosition();
+            Point2D newPos = currentPos.add(offset);
+            shape.setPosition(newPos);
+        }
+        
+        // Update group position to match the first child's new position
+        this.position = children.get(0).getPosition();
     }
     
     @Override
@@ -99,6 +121,7 @@ public class CompositeShape implements iShape, java.lang.Cloneable {
     
     /**
      * Set the top-left position of the group (for compatibility with Shape)
+     * This moves all children by the offset
      */
     public void setTopLeft(Point2D position) {
         setPosition(position);

@@ -75,6 +75,8 @@ public ShapeDecorator(iShape decoratedShape) {
 
     @Override
     public iShape clone() throws CloneNotSupportedException {
+        // Default: clone the decorated shape
+        // Subclasses should override this to preserve decorator properties
         return decoratedShape.clone();
     }
 }

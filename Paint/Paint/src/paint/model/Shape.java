@@ -42,10 +42,12 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
     @Override
     public void setPosition(Point2D position) {
         this.startPosition = position;
+        this.topLeft = calculateTopLeft();  // Recalculate topLeft when position changes
     }
 
     public void setEndPosition(Point2D position) {
         this.endPosition = position;
+        this.topLeft = calculateTopLeft();  // Recalculate topLeft when end position changes
     }
 
     @Override
@@ -194,9 +196,14 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
             copy.properties = new java.util.HashMap<>(this.properties);
             copy.setPropertiesToVariables();
         } else {
-
             copy.properties = new java.util.HashMap<>();
         }
+
+        // Also copy the strokeColor and fillColor fields directly
+        copy.strokeColor = this.strokeColor;
+        copy.fillColor = this.fillColor;
+        copy.strokeGradient = this.strokeGradient;
+        copy.fillGradient = this.fillGradient;
 
         return copy;
     }

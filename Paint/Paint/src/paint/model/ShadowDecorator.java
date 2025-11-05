@@ -24,12 +24,12 @@ public class ShadowDecorator extends ShapeDecorator {
             baseShape = ((ShapeDecorator) baseShape).decoratedShape;
         }
         
-        // Cast to Shape to access drawing properties
+        // Save original stroke width
+        double originalStrokeWidth = gc.getLineWidth();
+        
+        // Handle Shape objects (Circle, Rectangle, etc.)
         if (baseShape instanceof Shape) {
             Shape shapeObj = (Shape) baseShape;
-            
-            // Save original stroke width
-            double originalStrokeWidth = gc.getLineWidth();
             
             // Save original colors
             Color originalStroke = shapeObj.getColor();
@@ -60,11 +60,48 @@ public class ShadowDecorator extends ShapeDecorator {
             shapeObj.setColor(originalStroke);
             shapeObj.setFillColor(originalFill);
         }
+        // Handle CompositeShape (groups of shapes)
+        else if (baseShape instanceof CompositeShape) {
+            CompositeShape compositeObj = (CompositeShape) baseShape;
+            
+            // Save original colors
+            Color originalStroke = compositeObj.getColor();
+            Color originalFill = compositeObj.getFillColor();
+            
+            // Draw shadow for all children
+            compositeObj.setColor(Color.color(0, 0, 0, 0));
+            compositeObj.setFillColor(Color.TRANSPARENT);
+            
+            // Draw shadow layers
+            for (int layer = 1; layer <= 8; layer++) {
+                double opacity = 0.15 * (1.0 - (layer / 8.0));
+                double lineWidth = (9 - layer) * 1.5;
+                
+                Color shadowColor = Color.color(0, 0, 0, opacity);
+                compositeObj.setColor(shadowColor);
+                gc.setLineWidth(lineWidth);
+                
+                baseShape.draw(canvas);
+            }
+            
+            // Restore original stroke width
+            gc.setLineWidth(originalStrokeWidth);
+            
+            // Restore original colors
+            compositeObj.setColor(originalStroke);
+            compositeObj.setFillColor(originalFill);
+        }
         
         // Draw the original shape on top with full appearance
         decoratedShape.draw(canvas);
     }
+    
+    @Override
+    public iShape clone() throws CloneNotSupportedException {
+        // Clone the decorated shape
+        iShape clonedShape = decoratedShape.clone();
+        // Return new ShadowDecorator with cloned shape
+        return new ShadowDecorator(clonedShape, 0, SHADOW_COLOR);
+    }
 }
-
-
 

@@ -32,4 +32,12 @@ public class BorderDecorator extends ShapeDecorator {
         decoratedShape.setColor(originalColor);
         canvas.getGraphicsContext2D().setLineWidth(originalLineWidth);
     }
+    
+    @Override
+    public iShape clone() throws CloneNotSupportedException {
+        // Clone the decorated shape
+        iShape clonedShape = decoratedShape.clone();
+        // Return new BorderDecorator with cloned shape and same border properties
+        return new BorderDecorator(clonedShape, borderWidth, borderColor);
+    }
 }

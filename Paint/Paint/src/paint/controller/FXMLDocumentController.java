@@ -419,13 +419,11 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     // تم تعديل هذه الدالة لاستخدام الشكل الأساسي وتطبيق الـ Decorator بشكل مؤقت للرسم.
     public void redraw(Canvas canvas) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight()); // استخدام حجم الكانفاس الحقيقي
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         
         try {
             for (int i = 0; i < shapeList.size(); i++) {
-                iShape shToDraw = shapeList.get(i); // الشكل الأساسي أو المزيّن
-
-                // يتم الرسم باستخدام الكائن المزيّن (أو الشكل الأساسي إذا لم يكن هناك Decorator)
+                iShape shToDraw = shapeList.get(i);
                 shToDraw.draw(canvas);
             }
         } catch (Exception e) {
@@ -694,19 +692,25 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         
         iShape selected = shapeList.get(selectedIndex);
         
-        if (!(selected instanceof CompositeShape)) {
+        // Unwrap decorators to get the actual shape
+        iShape actualShape = selected;
+        while (actualShape instanceof ShapeDecorator) {
+            actualShape = ((ShapeDecorator) actualShape).getDecoratedShape();
+        }
+        
+        if (!(actualShape instanceof CompositeShape)) {
             Message.setText("Selected shape is not a group!");
             return;
         }
         
-        CompositeShape group = (CompositeShape) selected;
+        CompositeShape group = (CompositeShape) actualShape;
         
         if (group.isEmpty()) {
             Message.setText("Group is empty!");
             return;
         }
         
-        // Remove the group
+        // Remove the group (or its decorator)
         shapeList.remove(selectedIndex);
         
         // Add all child shapes back to the main list
