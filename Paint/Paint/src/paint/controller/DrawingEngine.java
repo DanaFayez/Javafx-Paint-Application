@@ -28,11 +28,7 @@ public interface DrawingEngine {
     public void save(String path);
     public void load(String path);
     
-// *************** bonus functions ****************
-    /* return the classes (types) of supported shapes already exist and the
-    * ones that can be dynamically loaded at runtime (see Part 4) */
     public java.util.List<Class<? extends Shape>> getSupportedShapes();
     
-    /* add to the supported shapes the new shape class (see Part 4) */
     public void installPluginShape(String jarPath);
 }

@@ -109,7 +109,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
      */
     private Point2D start;
     private Point2D end;
-
+// STAGE 2: Composite/Decorator Implementation
     // Composition: Current stroke color for creating shapes
     private Color currentStrokeColor;
     private boolean useShadow = false;
@@ -180,7 +180,6 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
                 resize = true;
                 Message.setText("Click on the new right-button position below to resize the selected shape.");
             } else {
-                // The message here was incorrect in the original code, but kept for minimal change principle:
                 Message.setText("You need to pick a shape first to copy it.");
             }
         }
@@ -303,13 +302,12 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             return;
         }
         shapeList.remove(index);
-        // تم تغيير setFillColor لاستخدام اللون الذي تم حفظه
         temp.setFillColor(c);
         shapeList.add(index, temp);
         refresh(CanvasBox);
 
     }
-    
+// STAGE 2: Composite/Decorator Implementation
     @FXML
     public void dragFunction() {
         String type = ShapeBox.getValue();
@@ -319,37 +317,35 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         }
 
         iShape sh;
-        Shape baseShape = null; // تم تعريف المتغير خارج كتلة try لإصلاح الخطأ الأول
-        
+        Shape baseShape = null;
+
         try {
-            // 1. إنشاء الشكل الأساسي باستخدام ShapeFactory (Composition pattern)
+            // 1.ShapeFactory (Composition pattern)
             baseShape = new ShapeFactory().createShape(type, start, end, currentStrokeColor);
             sh = baseShape;
-            
-            // 2. تطبيق Decorator pattern على الشكل قبل إضافته
+
+            // 2.  Decorator pattern 
             if (useShadow) {
-                // يفترض وجود ShadowDecorator
-                sh = new ShadowDecorator(sh, 10.0, Color.GRAY); 
+                // ShadowDecorator
+                sh = new ShadowDecorator(sh, 10.0, Color.GRAY);
             }
             if (useBorder) {
-                // يفترض وجود BorderDecorator
+                //BorderDecorator
                 sh = new BorderDecorator(sh, 3.0, Color.BLACK);
             }
         } catch (Exception e) {
-            // هذا الخطأ يحدث عادة إذا كان اسم الشكل غير موجود في ShapeFactory
             Message.setText("Error creating shape: Check if ShapeFactory supports '" + type + "'");
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, "Error creating shape", e);
             return;
         }
-        
-        // 3. إضافة الشكل الأساسي (Shape) إلى القائمة لتتبع الـ Memento
-        // baseShape لن يكون null هنا بسبب التحقق في try/catch.
+
+        //Memento
         if (baseShape != null) {
-             addShape(baseShape); 
+            addShape(baseShape);
         } else {
-             Message.setText("Could not add shape to list. Drawing only.");
-             sh.draw(CanvasBox); 
-             return;
+            Message.setText("Could not add shape to list. Drawing only.");
+            sh.draw(CanvasBox);
+            return;
         }
     }
 
@@ -358,7 +354,6 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         ObservableList l = FXCollections.observableArrayList(new ArrayList());
         try {
             for (int i = 0; i < shapeList.size(); i++) {
-                // يجب أن تكون كلاسات الأشكال في الحزمة 'paint.model'
                 String temp = shapeList.get(i).getClass().getSimpleName() + "  (" + (int) shapeList.get(i).getTopLeft().getX() + "," + (int) shapeList.get(i).getTopLeft().getY() + ")";
                 l.add(temp);
             }
@@ -390,12 +385,11 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         ColorBox.setValue(Color.BLACK);
         // Initialize with composition: use Color directly
         currentStrokeColor = Color.BLACK;
-        
+
         // Enable multiple selection for GROUP functionality
         ShapeList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        
-        // التأكد من أن CanvasBox مُهيأ لبدء الرسم
-        if(CanvasBox != null) {
+
+        if (CanvasBox != null) {
             CanvasBox.getGraphicsContext2D().setStroke(Color.BLACK);
         }
     }
@@ -403,10 +397,8 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     @Override
     public void refresh(Object canvas) {
         try {
-            // التأكد من حفظ الحالة الحالية قبل الإفراغ
             primary.push(new ArrayList(cloneList(shapeList)));
-            
-            // مسح تاريخ Redo عند إضافة شكل جديد
+
             secondary.clear();
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
@@ -416,11 +408,11 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     }
 
     // paint.controller.FXMLDocumentController.redraw()
-    // تم تعديل هذه الدالة لاستخدام الشكل الأساسي وتطبيق الـ Decorator بشكل مؤقت للرسم.
+    // Decorator .
     public void redraw(Canvas canvas) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        
+
         try {
             for (int i = 0; i < shapeList.size(); i++) {
                 iShape shToDraw = shapeList.get(i);
@@ -465,16 +457,13 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             Message.setText("We are back to zero point! .. Can Undo nothing more!");
             return;
         }
-        
-        if (primary.size() > 1) { // نترك الحالة الحالية (العنصر الأخير) ليتم سحبها لاحقاً
-            // نسحب الحالة الحالية
+
+        if (primary.size() > 1) { 
             ArrayList temp = (ArrayList) primary.pop();
             secondary.push(temp);
 
-            // نأخذ الحالة السابقة
             temp = (ArrayList) primary.peek();
-            
-            // نحتاج إلى عمل استنساخ عميق للحالة التي يتم استعادتها
+
             try {
                 shapeList = cloneList(temp);
             } catch (CloneNotSupportedException ex) {
@@ -482,12 +471,10 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
                 return;
             }
         } else if (primary.size() == 1) {
-             // آخر حالة (الفارغة غالباً)
             ArrayList temp = (ArrayList) primary.pop();
             secondary.push(temp);
             shapeList = new ArrayList<iShape>();
         }
-
 
         redraw(CanvasBox);
         ShapeList.setItems((getStringList()));
@@ -496,16 +483,14 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     @Override
     public void redo() {
         if (secondary.empty()) {
-             Message.setText("There is no more history for me to get .. Go search history books.");
-             return;
+            Message.setText("There is no more history for me to get .. Go search history books.");
+            return;
         }
-        
+
         ArrayList temp = (ArrayList) secondary.pop();
-        
-        // يجب أن نضع الحالة المستعادة في Primary Stack
+
         primary.push(temp);
 
-        // نحتاج إلى عمل استنساخ عميق للحالة التي يتم استعادتها
         try {
             shapeList = cloneList(temp);
         } catch (CloneNotSupportedException ex) {
@@ -519,9 +504,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     @Override
     public void save(String path) {
-        // Minor modification: checking substring length before accessing, which is safer.
         if (path.length() >= 4 && path.substring(path.length() - 4).equals(".xml")) {
-            // يفترض وجود SaveToXML في الحزمة paint.model أو في مكان يمكن الوصول إليه
             SaveToXML x = new SaveToXML(path, shapeList);
             if (x.checkSuccess()) {
                 Message.setText("File Saved Successfully");
@@ -538,10 +521,8 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     @Override
     public void load(String path) {
-        // Minor modification: checking substring length before accessing, which is safer.
         if (path.length() >= 4 && path.substring(path.length() - 4).equals(".xml")) {
             try {
-                // يفترض وجود LoadFromXML في الحزمة paint.model أو في مكان يمكن الوصول إليه
                 LoadFromXML l = new LoadFromXML(path);
                 if (l.checkSuccess()) {
                     shapeList = l.getList();
@@ -554,7 +535,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
                 Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ParserConfigurationException ex) {
                 Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) { // تم إصلاح خطأ IOException هنا
+            } catch (IOException ex) { 
                 Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
             }
 
@@ -574,23 +555,24 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     public void installPluginShape(String jarPath) {
         Message.setText("Not supported yet.");
     }
+// STAGE 2: Composite/Decorator Implementation
 
     // ==================== DECORATOR PATTERN METHODS ====================
     // Decorator pattern methods
     @FXML
     public void handleShadowEffect(ActionEvent event) {
         int selectedIndex = ShapeList.getSelectionModel().getSelectedIndex();
-        
+
         if (selectedIndex < 0 || selectedIndex >= shapeList.size()) {
             Message.setText("Please select a shape first!");
             return;
         }
-        
+
         iShape selectedShape = shapeList.get(selectedIndex);
-        
+
         // Check if shadow is already applied
         boolean hasShadow = selectedShape instanceof ShadowDecorator;
-        
+
         if (hasShadow) {
             // Remove shadow decorator by unwrapping it
             iShape unwrapped = ((ShadowDecorator) selectedShape).getDecoratedShape();
@@ -602,24 +584,24 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             shapeList.set(selectedIndex, decoratedShape);
             Message.setText("Shadow applied to shape");
         }
-        
+
         redraw(CanvasBox);
     }
 
     @FXML
     public void handleBorderEffect(ActionEvent event) {
         int selectedIndex = ShapeList.getSelectionModel().getSelectedIndex();
-        
+
         if (selectedIndex < 0 || selectedIndex >= shapeList.size()) {
             Message.setText("Please select a shape first!");
             return;
         }
-        
+
         iShape selectedShape = shapeList.get(selectedIndex);
-        
+
         // Check if border is already applied
         boolean hasBorder = selectedShape instanceof BorderDecorator;
-        
+
         if (hasBorder) {
             // Remove border decorator by unwrapping it
             iShape unwrapped = ((BorderDecorator) selectedShape).getDecoratedShape();
@@ -631,10 +613,10 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             shapeList.set(selectedIndex, decoratedShape);
             Message.setText("Border applied to shape");
         }
-        
+
         redraw(CanvasBox);
     }
-
+// STAGE 2: Composite/Decorator Implementation
     // ==================== COMPOSITE PATTERN METHODS ====================
     /**
      * Group selected shapes into a CompositeShape
@@ -642,15 +624,15 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     @FXML
     public void handleGroupShapes(ActionEvent event) {
         ObservableList<?> selectedIndices = ShapeList.getSelectionModel().getSelectedIndices();
-        
+
         if (selectedIndices == null || selectedIndices.isEmpty() || selectedIndices.size() < 2) {
             Message.setText("Select at least 2 shapes to group!");
             return;
         }
-        
+
         // Create a new composite shape
         CompositeShape group = new CompositeShape("Group_" + System.currentTimeMillis());
-        
+
         // Add selected shapes to the group
         java.util.List<iShape> selectedShapes = new java.util.ArrayList<>();
         for (Object index : selectedIndices) {
@@ -658,69 +640,68 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
                 selectedShapes.add(shapeList.get((Integer) index));
             }
         }
-        
+
         // Remove selected shapes from main list (in reverse order)
         for (int i = selectedIndices.size() - 1; i >= 0; i--) {
             Integer index = (Integer) selectedIndices.get(i);
             shapeList.remove((int) index);
         }
-        
+
         // Add all selected shapes to the group
         for (iShape shape : selectedShapes) {
             group.addShape(shape);
         }
-        
+
         // Add the composite group to the main shape list
         shapeList.add(group);
-        
+
         Message.setText("Grouped " + selectedShapes.size() + " shapes!");
         refresh(CanvasBox);
         ShapeList.setItems(getStringList());
     }
-    
+
     /**
      * Ungroup a composite shape into individual shapes
      */
     @FXML
     public void handleUngroupShapes(ActionEvent event) {
         int selectedIndex = ShapeList.getSelectionModel().getSelectedIndex();
-        
+
         if (selectedIndex < 0) {
             Message.setText("Select a group to ungroup!");
             return;
         }
-        
+
         iShape selected = shapeList.get(selectedIndex);
-        
+
         // Unwrap decorators to get the actual shape
         iShape actualShape = selected;
         while (actualShape instanceof ShapeDecorator) {
             actualShape = ((ShapeDecorator) actualShape).getDecoratedShape();
         }
-        
+
         if (!(actualShape instanceof CompositeShape)) {
             Message.setText("Selected shape is not a group!");
             return;
         }
-        
+
         CompositeShape group = (CompositeShape) actualShape;
-        
+
         if (group.isEmpty()) {
             Message.setText("Group is empty!");
             return;
         }
-        
+
         // Remove the group (or its decorator)
         shapeList.remove(selectedIndex);
-        
+
         // Add all child shapes back to the main list
         for (iShape child : group.getChildren()) {
             shapeList.add(child);
         }
-        
+
         Message.setText("Ungrouped " + group.getShapeCount() + " shapes!");
         refresh(CanvasBox);
         ShapeList.setItems(getStringList());
     }
 }
-

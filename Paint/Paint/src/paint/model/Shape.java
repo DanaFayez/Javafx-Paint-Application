@@ -30,15 +30,7 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
         this.topLeft = calculateTopLeft();
     }
 
-    /*
-     * public Shape(Point2D startPos, Point2D endPos, Color strockColor, Color
-     * fillColor){
-     * this.color = strockColor;
-     * this.startPosition = startPos;
-     * this.endPosition = endPos;
-     * this.fillColor = fillColor;
-     * }
-     */
+   
     @Override
     public void setPosition(Point2D position) {
         this.startPosition = position;
@@ -174,7 +166,6 @@ public abstract class Shape implements iShape, java.lang.Cloneable {
    public void draw(Canvas canvas) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         
-        // Use composition for gradient support
         if (strokeGradient != null) {
             gc.setStroke(strokeGradient);
         } else {
