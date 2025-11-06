@@ -620,43 +620,79 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     // ==================== COMPOSITE PATTERN METHODS ====================
     /**
      * Group selected shapes into a CompositeShape
+     * 
+     * LINE-BY-LINE EXPLANATION:
+     * This method handles the grouping functionality that allows users to combine
+     * multiple shapes into a single composite group using the Composite design pattern.
+     * 
+     * @param event The ActionEvent triggered when the Group button is clicked
      */
     @FXML
     public void handleGroupShapes(ActionEvent event) {
+        // LINE 1: Get the list of selected indices from the ShapeList ListView
+        // The ShapeList is configured for MULTIPLE selection mode (line 390)
+        // This returns an ObservableList containing Integer indices of selected items
         ObservableList<?> selectedIndices = ShapeList.getSelectionModel().getSelectedIndices();
 
+        // LINES 2-5: Validate that at least 2 shapes are selected for grouping
+        // Check if: (1) selectedIndices is null, (2) list is empty, or (3) less than 2 items selected
+        // Grouping requires a minimum of 2 shapes to make sense
         if (selectedIndices == null || selectedIndices.isEmpty() || selectedIndices.size() < 2) {
+            // Display error message to user via the Message Label
             Message.setText("Select at least 2 shapes to group!");
+            // Exit the method early - no grouping performed
             return;
         }
 
-        // Create a new composite shape
+        // LINE 6: Create a new CompositeShape object to hold the grouped shapes
+        // The group is given a unique name using current timestamp: "Group_1234567890"
+        // CompositeShape implements the Composite pattern to treat groups as single shapes
         CompositeShape group = new CompositeShape("Group_" + System.currentTimeMillis());
 
-        // Add selected shapes to the group
+        // LINES 7-12: Collect the actual shape objects from the selected indices
+        // Create a temporary ArrayList to store references to the selected iShape objects
         java.util.List<iShape> selectedShapes = new java.util.ArrayList<>();
+        // Iterate through each selected index from the ListView
         for (Object index : selectedIndices) {
+            // Type-check to ensure the index is an Integer (defensive programming)
             if (index instanceof Integer) {
+                // Get the shape at this index from the main shapeList and add to selectedShapes
                 selectedShapes.add(shapeList.get((Integer) index));
             }
         }
 
-        // Remove selected shapes from main list (in reverse order)
+        // LINES 13-16: Remove the selected shapes from the main shapeList
+        // IMPORTANT: Iterate in REVERSE order (from highest index to lowest)
+        // Reason: Removing items changes indices - removing from end preserves lower indices
+        // Example: If removing indices [1,3,5], remove 5 first, then 3, then 1
         for (int i = selectedIndices.size() - 1; i >= 0; i--) {
+            // Get the index value at position i in the selectedIndices list
             Integer index = (Integer) selectedIndices.get(i);
+            // Remove the shape at this index from the main shapeList
             shapeList.remove((int) index);
         }
 
-        // Add all selected shapes to the group
+        // LINES 17-19: Add each selected shape to the new CompositeShape group
+        // This builds the parent-child relationship in the Composite pattern
         for (iShape shape : selectedShapes) {
+            // Call addShape() on the CompositeShape to add this child shape
             group.addShape(shape);
         }
 
-        // Add the composite group to the main shape list
+        // LINE 20: Add the newly created group to the main shapeList
+        // The group is now treated as a single shape in the list
+        // All children are contained within this composite and no longer appear individually
         shapeList.add(group);
 
+        // LINE 21: Display success message showing how many shapes were grouped
         Message.setText("Grouped " + selectedShapes.size() + " shapes!");
+        
+        // LINE 22: Refresh the canvas to redraw all shapes with the new grouping
+        // This clears the canvas and redraws all shapes including the new group
         refresh(CanvasBox);
+        
+        // LINE 23: Update the ShapeList ListView to reflect the changes
+        // The grouped shapes are replaced by a single "Group_..." entry
         ShapeList.setItems(getStringList());
     }
 
