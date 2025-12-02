@@ -109,15 +109,15 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
      */
     private Point2D start;
     private Point2D end;
-// STAGE 2: Composite/Decorator Implementation
+    // STAGE 2: Composite/Decorator Implementation
     // Composition: Current stroke color for creating shapes
     private Color currentStrokeColor;
     private boolean useShadow = false;
     private boolean useBorder = false;
 
-    //Singleton Pattern
+    // Singleton Pattern
     private static ArrayList<iShape> shapeList = new ArrayList<>();
-// Observer Pattern
+    // Observer Pattern
     private List<Observer> observers = new ArrayList<>();
 
     private boolean move = false;
@@ -127,9 +127,9 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     private boolean load = false;
     private boolean importt = false;
 
-    //MEMENTO DP
-    private Stack primary = new Stack<ArrayList<Shape>>();
-    private Stack secondary = new Stack<ArrayList<Shape>>();
+    // MEMENTO Pattern
+    private Stack<ArrayList<iShape>> primary = new Stack<>();
+    private Stack<ArrayList<iShape>> secondary = new Stack<>();
 
     // handleButtonAction added
     @FXML
@@ -281,7 +281,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         refresh(CanvasBox);
 
     }
-// Prototype Pattern (Cloning)
+    // Prototype Pattern (Cloning)
 
     public void copyFunction() throws CloneNotSupportedException {
         int index = ShapeList.getSelectionModel().getSelectedIndex();
@@ -299,8 +299,9 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         int index = ShapeList.getSelectionModel().getSelectedIndex();
         Color c = shapeList.get(index).getFillColor();
         start = shapeList.get(index).getTopLeft();
-        //Factory DP with Composition pattern
-        Shape temp = new ShapeFactory().createShape(shapeList.get(index).getClass().getSimpleName(), start, end, currentStrokeColor);
+        // Factory DP with Composition pattern
+        Shape temp = new ShapeFactory().createShape(shapeList.get(index).getClass().getSimpleName(), start, end,
+                currentStrokeColor);
         if (temp.getClass().getSimpleName().equals("Line")) {
             Message.setText("Line doesn't support this command. Sorry :(");
             return;
@@ -311,7 +312,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         refresh(CanvasBox);
 
     }
-// STAGE 2: Composite/Decorator Implementation
+    // STAGE 2: Composite/Decorator Implementation
 
     @FXML
     public void dragFunction() {
@@ -329,13 +330,13 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             baseShape = new ShapeFactory().createShape(type, start, end, currentStrokeColor);
             sh = baseShape;
 
-            // 2.  Decorator pattern 
+            // 2. Decorator pattern
             if (useShadow) {
                 // ShadowDecorator
                 sh = new ShadowDecorator(sh, 10.0, Color.GRAY);
             }
             if (useBorder) {
-                //BorderDecorator
+                // BorderDecorator
                 sh = new BorderDecorator(sh, 3.0, Color.BLACK);
             }
         } catch (Exception e) {
@@ -344,7 +345,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             return;
         }
 
-        //Memento
+        // Memento
         if (baseShape != null) {
             addShape(baseShape);
         } else {
@@ -354,12 +355,14 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         }
     }
 
-// Observer Pattern (Helper)
+    // Observer Pattern (Helper)
     public ObservableList getStringList() {
         ObservableList l = FXCollections.observableArrayList(new ArrayList());
         try {
             for (int i = 0; i < shapeList.size(); i++) {
-                String temp = shapeList.get(i).getClass().getSimpleName() + "  (" + (int) shapeList.get(i).getTopLeft().getX() + "," + (int) shapeList.get(i).getTopLeft().getY() + ")";
+                String temp = shapeList.get(i).getClass().getSimpleName() + "  ("
+                        + (int) shapeList.get(i).getTopLeft().getX() + "," + (int) shapeList.get(i).getTopLeft().getY()
+                        + ")";
                 l.add(temp);
             }
         } catch (Exception e) {
@@ -371,7 +374,6 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         ArrayList<iShape> temp = new ArrayList<iShape>();
         for (int i = 0; i < l.size(); i++) {
             temp.add(l.get(i).clone());
-            notifyObservers();
 
         }
         return temp;
@@ -406,12 +408,12 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     @Override
     public void refresh(Object canvas) {
         try {
-            primary.push(new ArrayList(cloneList(shapeList)));
+            primary.push(cloneList(shapeList)); // memento
             secondary.clear();
         } catch (CloneNotSupportedException ex) {
             // ... logging
         }
-// Observer Pattern (Notification)
+        // Observer Pattern (Notification)
         notifyObservers();
     }
 
@@ -431,7 +433,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, "Redraw Error", e);
         }
     }
-// DrawingEngine Method
+    // DrawingEngine Method
 
     @Override
     public void addShape(Shape shape) {
@@ -447,7 +449,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     }
 
-// Observer Pattern (Concrete Observer: List)
+    // Observer Pattern (Concrete Observer: List)
     private Observer listObserver = new Observer() {
         @Override
         public void update() {
@@ -455,7 +457,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         }
     };
 
-// Observer Pattern (Concrete Observer: Canvas)
+    // Observer Pattern (Concrete Observer: Canvas)
     private Observer canvasObserver = new Observer() {
         @Override
         public void update() {
@@ -471,57 +473,55 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     @Override
     public void undo() {
-        if (primary.empty()) {
-            Message.setText("We are back to zero point! .. Can Undo nothing more!");
+        if (primary.isEmpty()) {
+            Message.setText("No more undo steps available.");
             return;
         }
 
         if (primary.size() > 1) {
-            ArrayList temp = (ArrayList) primary.pop();
-            secondary.push(temp);
+            ArrayList<iShape> current = primary.pop();
+            secondary.push(current);
 
-            temp = (ArrayList) primary.peek();
+            ArrayList<iShape> previous = primary.peek();
 
             try {
-                shapeList = cloneList(temp);
+                shapeList = cloneList(previous); // memento
             } catch (CloneNotSupportedException ex) {
                 Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
                 return;
             }
-        } else if (primary.size() == 1) {
-            ArrayList temp = (ArrayList) primary.pop();
-            secondary.push(temp);
-            shapeList = new ArrayList<iShape>();
+
+        } else {
+            ArrayList<iShape> last = primary.pop();
+            secondary.push(last);
+            shapeList = new ArrayList<>();
         }
 
         redraw(CanvasBox);
-        ShapeList.setItems((getStringList()));
+        ShapeList.setItems(getStringList());
         notifyObservers();
-
     }
 
     @Override
     public void redo() {
-        if (secondary.empty()) {
-            Message.setText("There is no more history for me to get .. Go search history books.");
+        if (secondary.isEmpty()) {
+            Message.setText("No more redo steps available.");
             return;
         }
 
-        ArrayList temp = (ArrayList) secondary.pop();
-
-        primary.push(temp);
+        ArrayList<iShape> memento = secondary.pop(); // memento
+        primary.push(memento); // memento
 
         try {
-            shapeList = cloneList(temp);
+            shapeList = cloneList(memento); // memento
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
 
         redraw(CanvasBox);
-        ShapeList.setItems((getStringList()));
+        ShapeList.setItems(getStringList());
         notifyObservers();
-
     }
 
     @Override
@@ -577,7 +577,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     public void installPluginShape(String jarPath) {
         Message.setText("Not supported yet.");
     }
-// STAGE 2: Composite/Decorator Implementation
+    // STAGE 2: Composite/Decorator Implementation
 
     // ==================== DECORATOR PATTERN METHODS ====================
     @FXML
@@ -637,7 +637,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
         redraw(CanvasBox);
     }
-// STAGE 2: Composite/Decorator Implementation
+    // STAGE 2: Composite/Decorator Implementation
     // ==================== COMPOSITE PATTERN METHODS ====================
 
     /**
@@ -726,7 +726,8 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         refresh(CanvasBox);
         ShapeList.setItems(getStringList());
     }
-// ==================== OBSERVER PATTERN (SUBJECT) IMPLEMENTATION ====================
+    // ==================== OBSERVER PATTERN (SUBJECT) IMPLEMENTATION
+    // ====================
 
     /**
      * Observer Pattern (Attach)
