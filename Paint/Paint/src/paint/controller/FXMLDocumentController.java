@@ -115,8 +115,10 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     private boolean useShadow = false;
     private boolean useBorder = false;
 
-    //SINGLETON DP - Changed to iShape to support Composite Pattern
+    //Singleton Pattern
     private static ArrayList<iShape> shapeList = new ArrayList<>();
+// Observer Pattern
+    private List<Observer> observers = new ArrayList<>();
 
     private boolean move = false;
     private boolean copy = false;
@@ -277,7 +279,9 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         int index = ShapeList.getSelectionModel().getSelectedIndex();
         shapeList.get(index).setTopLeft(start);
         refresh(CanvasBox);
+
     }
+// Prototype Pattern (Cloning)
 
     public void copyFunction() throws CloneNotSupportedException {
         int index = ShapeList.getSelectionModel().getSelectedIndex();
@@ -308,6 +312,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     }
 // STAGE 2: Composite/Decorator Implementation
+
     @FXML
     public void dragFunction() {
         String type = ShapeBox.getValue();
@@ -349,7 +354,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         }
     }
 
-    //Observer DP
+// Observer Pattern (Helper)
     public ObservableList getStringList() {
         ObservableList l = FXCollections.observableArrayList(new ArrayList());
         try {
@@ -366,6 +371,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         ArrayList<iShape> temp = new ArrayList<iShape>();
         for (int i = 0; i < l.size(); i++) {
             temp.add(l.get(i).clone());
+            notifyObservers();
 
         }
         return temp;
@@ -392,19 +398,21 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         if (CanvasBox != null) {
             CanvasBox.getGraphicsContext2D().setStroke(Color.BLACK);
         }
+        attach(canvasObserver);
+        attach(listObserver);
+
     }
 
     @Override
     public void refresh(Object canvas) {
         try {
             primary.push(new ArrayList(cloneList(shapeList)));
-
             secondary.clear();
         } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+            // ... logging
         }
-        redraw((Canvas) canvas);
-        ShapeList.setItems((getStringList()));
+// Observer Pattern (Notification)
+        notifyObservers();
     }
 
     // paint.controller.FXMLDocumentController.redraw()
@@ -423,28 +431,38 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, "Redraw Error", e);
         }
     }
+// DrawingEngine Method
 
     @Override
     public void addShape(Shape shape) {
         shapeList.add(shape);
         refresh(CanvasBox);
+
     }
 
     @Override
     public void removeShape(iShape shape) {
         shapeList.remove(shape);
         refresh(CanvasBox);
+
     }
 
-    @Override
-    public void updateShape(Shape oldShape, Shape newShape) {
-        int index = shapeList.indexOf((Object) oldShape);
-        if (index >= 0) {
-            shapeList.set(index, (iShape) newShape);
+// Observer Pattern (Concrete Observer: List)
+    private Observer listObserver = new Observer() {
+        @Override
+        public void update() {
+            ShapeList.setItems(getStringList());
         }
-        shapeList.add(newShape);
-        refresh(CanvasBox);
-    }
+    };
+
+// Observer Pattern (Concrete Observer: Canvas)
+    private Observer canvasObserver = new Observer() {
+        @Override
+        public void update() {
+            redraw(CanvasBox);
+        }
+
+    };
 
     @Override
     public Shape[] getShapes() {
@@ -458,7 +476,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             return;
         }
 
-        if (primary.size() > 1) { 
+        if (primary.size() > 1) {
             ArrayList temp = (ArrayList) primary.pop();
             secondary.push(temp);
 
@@ -478,6 +496,8 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
         redraw(CanvasBox);
         ShapeList.setItems((getStringList()));
+        notifyObservers();
+
     }
 
     @Override
@@ -500,6 +520,8 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
         redraw(CanvasBox);
         ShapeList.setItems((getStringList()));
+        notifyObservers();
+
     }
 
     @Override
@@ -535,7 +557,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
                 Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ParserConfigurationException ex) {
                 Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) { 
+            } catch (IOException ex) {
                 Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
             }
 
@@ -558,7 +580,6 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 // STAGE 2: Composite/Decorator Implementation
 
     // ==================== DECORATOR PATTERN METHODS ====================
-    // Decorator pattern methods
     @FXML
     public void handleShadowEffect(ActionEvent event) {
         int selectedIndex = ShapeList.getSelectionModel().getSelectedIndex();
@@ -618,8 +639,9 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     }
 // STAGE 2: Composite/Decorator Implementation
     // ==================== COMPOSITE PATTERN METHODS ====================
+
     /**
-     * Group selected shapes into a CompositeShape
+     * Composite Pattern (Group)
      */
     @FXML
     public void handleGroupShapes(ActionEvent event) {
@@ -661,7 +683,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     }
 
     /**
-     * Ungroup a composite shape into individual shapes
+     * Composite Pattern (Ungroup)
      */
     @FXML
     public void handleUngroupShapes(ActionEvent event) {
@@ -704,4 +726,32 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         refresh(CanvasBox);
         ShapeList.setItems(getStringList());
     }
+// ==================== OBSERVER PATTERN (SUBJECT) IMPLEMENTATION ====================
+
+    /**
+     * Observer Pattern (Attach)
+     */
+    @Override
+    public void attach(Observer o) {
+        observers.add(o);
+    }
+
+    /**
+     * Observer Pattern (Detach)
+     */
+    @Override
+    public void detach(Observer o) {
+        observers.remove(o);
+    }
+
+    /**
+     * Observer Pattern (Notify)
+     */
+    @Override
+    public void notifyObservers() {
+        for (Observer o : observers) {
+            o.update();
+        }
+    }
+
 }

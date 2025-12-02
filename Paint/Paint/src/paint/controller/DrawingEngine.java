@@ -1,34 +1,50 @@
 package paint.controller;
 
+import paint.model.Observer;
 import paint.model.Shape;
 import paint.model.iShape;
 
-
 public interface DrawingEngine {
     
-    /* redraw all shapes on the canvas */
+    /* Redraw canvas */
     public void refresh(Object canvas);
     
+    /* Add shape */
     public void addShape(Shape shape);
     
+    /* Remove shape */
     public void removeShape(iShape shape);
     
+    /* Update shape */
     public void updateShape(Shape oldShape, Shape newShape);
     
-    /* return the created shapes objects */
+    /* Return shapes */
     public Shape[] getShapes();
     
-    /* limited to 20 steps. You consider these actions in
-    * undo & redo: addShape, removeShape, updateShape */
+    /* Undo action */
     public void undo();
+    
+    /* Redo action */
     public void redo();
     
-    /* use the file extension to determine the type,
-    * or throw runtime exception when unexpected extension */
+    /* Save shapes */
     public void save(String path);
+    
+    /* Load shapes */
     public void load(String path);
     
+    /* Supported shapes */
     public java.util.List<Class<? extends Shape>> getSupportedShapes();
     
+    /* Install plugin */
     public void installPluginShape(String jarPath);
+    
+    /* Attach observer */
+    public void attach(Observer o);
+    
+    /* Detach observer */
+    public void detach(Observer o);
+    
+    /* Notify observers */
+    public void notifyObservers();
 }
