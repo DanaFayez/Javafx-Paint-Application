@@ -15,9 +15,7 @@ public interface DrawingEngine {
     /* Remove shape */
     public void removeShape(iShape shape);
     
-    /* Update shape */
-    public void updateShape(Shape oldShape, Shape newShape);
-    
+   
     /* Return shapes */
     public Shape[] getShapes();
     

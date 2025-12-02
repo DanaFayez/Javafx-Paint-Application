@@ -449,6 +449,8 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     }
 
+  
+
     // Observer Pattern (Concrete Observer: List)
     private Observer listObserver = new Observer() {
         @Override
