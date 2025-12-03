@@ -115,7 +115,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     private boolean useShadow = false;
     private boolean useBorder = false;
 
-    // Singleton Pattern
+    // Singleton, memento Pattern
     private static ArrayList<iShape> shapeList = new ArrayList<>();
     // Observer Pattern
     private List<Observer> observers = new ArrayList<>();
@@ -345,7 +345,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
             return;
         }
 
-        // Memento
+        // Adding the shape will lead to creating a new Memento in refresh().
         if (baseShape != null) {
             addShape(baseShape);
         } else {
