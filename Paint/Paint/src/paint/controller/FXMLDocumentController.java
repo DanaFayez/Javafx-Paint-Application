@@ -117,6 +117,10 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     // Singleton, memento Pattern
     private static ArrayList<iShape> shapeList = new ArrayList<>();
+
+    // memento Pattern
+    private CanvasCaretaker caretaker = new CanvasCaretaker();
+
     // Observer Pattern
     private List<Observer> observers = new ArrayList<>();
 
@@ -126,10 +130,6 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     private boolean save = false;
     private boolean load = false;
     private boolean importt = false;
-
-    // MEMENTO Pattern
-    private Stack<ArrayList<iShape>> primary = new Stack<>();
-    private Stack<ArrayList<iShape>> secondary = new Stack<>();
 
     // handleButtonAction added
     @FXML
@@ -408,11 +408,13 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     @Override
     public void refresh(Object canvas) {
         try {
-            primary.push(cloneList(shapeList)); // memento
-            secondary.clear();
+            CanvasMemento m = storeInMemento();
+            caretaker.addMemento(m);
         } catch (CloneNotSupportedException ex) {
             // ... logging
         }
+        redraw((Canvas) canvas);
+        ShapeList.setItems(getStringList());
         // Observer Pattern (Notification)
         notifyObservers();
     }
@@ -449,8 +451,6 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     }
 
-  
-
     // Observer Pattern (Concrete Observer: List)
     private Observer listObserver = new Observer() {
         @Override
@@ -475,47 +475,38 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     @Override
     public void undo() {
-        if (primary.isEmpty()) {
-            Message.setText("No more undo steps available.");
-            return;
-        }
+        try {
+            CanvasMemento previous = caretaker.undo();
 
-        if (primary.size() > 1) {
-            ArrayList<iShape> current = primary.pop();
-            secondary.push(current);
-
-            ArrayList<iShape> previous = primary.peek();
-
-            try {
-                shapeList = cloneList(previous); // memento
-            } catch (CloneNotSupportedException ex) {
-                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+            if (previous == null) {
+                Message.setText("No more undo steps available.");
                 return;
             }
 
-        } else {
-            ArrayList<iShape> last = primary.pop();
-            secondary.push(last);
-            shapeList = new ArrayList<>();
+            restoreFromMemento(previous);
+
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+            return;
         }
 
         redraw(CanvasBox);
         ShapeList.setItems(getStringList());
-        notifyObservers();
+        notifyObservers(); // Observer pattern
     }
 
     @Override
     public void redo() {
-        if (secondary.isEmpty()) {
-            Message.setText("No more redo steps available.");
-            return;
-        }
-
-        ArrayList<iShape> memento = secondary.pop(); // memento
-        primary.push(memento); // memento
-
         try {
-            shapeList = cloneList(memento); // memento
+            CanvasMemento next = caretaker.redo();
+
+            if (next == null) {
+                Message.setText("No more redo steps available.");
+                return;
+            }
+
+            restoreFromMemento(next);
+
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
             return;
@@ -755,6 +746,18 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         for (Observer o : observers) {
             o.update();
         }
+    }
+
+    // ====== Memento pattern ========
+
+    // Originator
+    public CanvasMemento storeInMemento() throws CloneNotSupportedException {
+        return new CanvasMemento(shapeList);
+    }
+
+    // Originator
+    public void restoreFromMemento(CanvasMemento m) throws CloneNotSupportedException {
+        shapeList = m.getState();
     }
 
 }
