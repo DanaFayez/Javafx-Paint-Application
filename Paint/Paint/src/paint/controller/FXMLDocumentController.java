@@ -123,6 +123,8 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
 
     // Observer Pattern
     private List<Observer> observers = new ArrayList<>();
+    ListObserver listObserver = new ListObserver(this);
+    CanvasObserver canvasObserver = new CanvasObserver(this);
 
     private boolean move = false;
     private boolean copy = false;
@@ -400,8 +402,8 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         if (CanvasBox != null) {
             CanvasBox.getGraphicsContext2D().setStroke(Color.BLACK);
         }
-        attach(canvasObserver);
         attach(listObserver);
+        attach(canvasObserver);
 
     }
 
@@ -450,23 +452,15 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         refresh(CanvasBox);
 
     }
+// Observer Pattern (Observers
 
-    // Observer Pattern (Concrete Observer: List)
-    private Observer listObserver = new Observer() {
-        @Override
-        public void update() {
-            ShapeList.setItems(getStringList());
-        }
-    };
+    public void updateShapeList() {
+        ShapeList.setItems(getStringList());
+    }
 
-    // Observer Pattern (Concrete Observer: Canvas)
-    private Observer canvasObserver = new Observer() {
-        @Override
-        public void update() {
-            redraw(CanvasBox);
-        }
-
-    };
+    public void redrawCanvas() {
+        redraw(CanvasBox);
+    }
 
     @Override
     public Shape[] getShapes() {
@@ -749,7 +743,6 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
     }
 
     // ====== Memento pattern ========
-
     // Originator
     public CanvasMemento storeInMemento() throws CloneNotSupportedException {
         return new CanvasMemento(shapeList);

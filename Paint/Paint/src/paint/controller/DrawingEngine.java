@@ -1,10 +1,13 @@
 package paint.controller;
 
+
 import paint.model.Observer;
 import paint.model.Shape;
 import paint.model.iShape;
 
 public interface DrawingEngine {
+
+
     
     /* Redraw canvas */
     public void refresh(Object canvas);
