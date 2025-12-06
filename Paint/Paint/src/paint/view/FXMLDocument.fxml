@@ -48,59 +48,80 @@
                 <RowConstraints maxHeight="50.0" minHeight="50.0" prefHeight="50.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <!-- Top Toolbar HBox -->
-                <HBox alignment="CENTER" maxHeight="50.0" maxWidth="1000.0" minHeight="50.0" minWidth="1000.0" prefHeight="50.0" prefWidth="1000.0">
-                    <children>
-                        <!-- ShapeBox -->
-                        <ComboBox fx:id="ShapeBox" maxHeight="50.0" minHeight="50.0" prefHeight="50.0" prefWidth="100.0" promptText="Shape" style="-fx-background-radius: 0px; -fx-background-color: fcff99;">
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </ComboBox>
-                        <!-- ColorPicker -->
-                        <ColorPicker fx:id="ColorBox" maxHeight="50.0" minHeight="50.0" prefHeight="50.0" prefWidth="100.0" promptText="Color" style="-fx-background-radius: 0px; -fx-background-color: lightgreen;">
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </ColorPicker>
-                        <!-- Shadow Button -->
-                        <Button text="Shadow" maxHeight="50.0" minHeight="50.0" mnemonicParsing="false" onAction="#handleShadowEffect" prefHeight="50.0" prefWidth="75.0" style="-fx-background-radius: 0px; -fx-background-color: #9370DB;">
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Button>
-                        <!-- Border Button -->
-                        <Button text="Border" maxHeight="50.0" minHeight="50.0" mnemonicParsing="false" onAction="#handleBorderEffect" prefHeight="50.0" prefWidth="75.0" style="-fx-background-radius: 0px; -fx-background-color: #20B2AA;">
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Button>
-                        <!-- Recolor Button -->
-                        <Button fx:id="RecolorBtn" contentDisplay="CENTER" maxHeight="50.0" minHeight="50.0" mnemonicParsing="false" onAction="#handleButtonAction" prefHeight="50.0" prefWidth="125.0" style="-fx-background-radius: 0px; -fx-background-color: lightpink;" styleClass="btns" text="Recolor">
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Button>
-                        <!-- Move Button -->
-                        <Button fx:id="MoveBtn" contentDisplay="CENTER" maxHeight="50.0" minHeight="50.0" mnemonicParsing="false" onAction="#handleButtonAction" prefHeight="50.0" prefWidth="125.0" style="-fx-background-radius: 0px; -fx-background-color: lightblue;" styleClass="btns" text="Move">
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Button>
-                        <!-- Copy Button -->
-                        <Button fx:id="CopyBtn" contentDisplay="CENTER" maxHeight="50.0" minHeight="50.0" mnemonicParsing="false" onAction="#handleButtonAction" prefHeight="50.0" prefWidth="125.0" style="-fx-background-radius: 0px; -fx-background-color: FED18C;" styleClass="btns" text="Copy">
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Button>
-                        <!-- Resize Button -->
-                        <Button fx:id="ResizeBtn" contentDisplay="CENTER" maxHeight="50.0" minHeight="50.0" mnemonicParsing="false" onAction="#handleButtonAction" prefHeight="50.0" prefWidth="125.0" style="-fx-background-color: #e4b9d2; -fx-background-radius: 0px;" styleClass="btns" text="Resize">
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Button>
-                    </children>
-                </HBox>
+            <!-- Top Toolbar HBox -->
+<HBox alignment="CENTER" prefHeight="50" prefWidth="1000" spacing="0">
+    <children>
+
+        <!-- ShapeBox -->
+        <ComboBox fx:id="ShapeBox" prefHeight="50" maxWidth="Infinity" promptText="Shape"
+                   style="-fx-background-radius: 0px; -fx-background-color: fcff99;">
+            <HBox.hgrow>
+                <Priority fx:constant="ALWAYS"/>
+            </HBox.hgrow>
+        </ComboBox>
+
+        <!-- ColorPicker -->
+        <ColorPicker fx:id="ColorBox" prefHeight="50" maxWidth="Infinity" promptText="Color"
+                     style="-fx-background-radius: 0px; -fx-background-color: lightgreen;">
+            <HBox.hgrow>
+                <Priority fx:constant="ALWAYS"/>
+            </HBox.hgrow>
+        </ColorPicker>
+
+        <!-- Shadow Button -->
+        <Button text="Shadow" prefHeight="50" maxWidth="Infinity" mnemonicParsing="false"
+                onAction="#handleShadowEffect" style="-fx-background-radius: 0px; -fx-background-color: #9370DB;">
+            <HBox.hgrow>
+                <Priority fx:constant="ALWAYS"/>
+            </HBox.hgrow>
+        </Button>
+
+        <!-- Border Button -->
+        <Button text="Border" prefHeight="50" maxWidth="Infinity" mnemonicParsing="false"
+                onAction="#handleBorderEffect" style="-fx-background-radius: 0px; -fx-background-color: #20B2AA;">
+            <HBox.hgrow>
+                <Priority fx:constant="ALWAYS"/>
+            </HBox.hgrow>
+        </Button>
+
+        <!-- Recolor Button -->
+        <Button fx:id="RecolorBtn" text="Recolor" prefHeight="50" maxWidth="Infinity"
+                onAction="#handleButtonAction" styleClass="btns"
+                style="-fx-background-radius: 0px; -fx-background-color: lightpink;">
+            <HBox.hgrow>
+                <Priority fx:constant="ALWAYS"/>
+            </HBox.hgrow>
+        </Button>
+
+        <!-- Move Button -->
+        <Button fx:id="MoveBtn" text="Move" prefHeight="50" maxWidth="Infinity"
+                onAction="#handleButtonAction" styleClass="btns"
+                style="-fx-background-radius: 0px; -fx-background-color: lightblue;">
+            <HBox.hgrow>
+                <Priority fx:constant="ALWAYS"/>
+            </HBox.hgrow>
+        </Button>
+
+        <!-- Copy Button -->
+        <Button fx:id="CopyBtn" text="Copy" prefHeight="50" maxWidth="Infinity"
+                onAction="#handleButtonAction" styleClass="btns"
+                style="-fx-background-radius: 0px; -fx-background-color: FED18C;">
+            <HBox.hgrow>
+                <Priority fx:constant="ALWAYS"/>
+            </HBox.hgrow>
+        </Button>
+
+        <!-- Resize Button -->
+        <Button fx:id="ResizeBtn" text="Resize" prefHeight="50" maxWidth="Infinity"
+                onAction="#handleButtonAction" styleClass="btns"
+                style="-fx-background-radius: 0px; -fx-background-color: #e4b9d2;">
+            <HBox.hgrow>
+                <Priority fx:constant="ALWAYS"/>
+            </HBox.hgrow>
+        </Button>
+
+    </children>
+</HBox>
 
                 <!-- Bottom Toolbar HBox - GROUP/UNGROUP (Composite Pattern) -->
                 <HBox alignment="CENTER" maxHeight="50.0" maxWidth="1000.0" minHeight="50.0" minWidth="1000.0" prefHeight="50.0" prefWidth="1000.0" GridPane.rowIndex="2">

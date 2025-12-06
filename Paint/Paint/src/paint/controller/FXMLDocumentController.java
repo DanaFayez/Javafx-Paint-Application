@@ -187,7 +187,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         }
 
         if (event.getSource() == UndoBtn) {
-            if (primary.empty()) {
+            if (!caretaker.canUndo()) {
                 Message.setText("We are back to zero point! .. Can Undo nothing more!");
                 return;
             }
@@ -195,7 +195,7 @@ public class FXMLDocumentController implements Initializable, DrawingEngine {
         }
 
         if (event.getSource() == RedoBtn) {
-            if (secondary.empty()) {
+            if (!caretaker.canRedo()) {
                 Message.setText("There is no more history for me to get .. Go search history books.");
                 return;
             }
